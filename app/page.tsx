@@ -147,14 +147,16 @@ export default function GoogleDorkGenerator() {
 
   const shareDork = async () => {
     if (generatedDork) {
-      const { data, error } = await supabase.from("shared_dorks").insert({ dork: generatedDork })
+      const { data, error } = await supabase.from("shared_dorks").insert({ dork: generatedDork }).select()
       if (error) {
         console.error("Error sharing dork:", error)
         toast.error("Failed to share dork")
-      } else {
+      } else if (data && data.length > 0) {
         const shareUrl = `${window.location.origin}/shared/${data[0].id}`
         copyToClipboard(shareUrl)
         toast.success("Share URL copied to clipboard!")
+      } else {
+        toast.error("Failed to generate share URL")
       }
     } else {
       toast.error("No dork generated to share")
