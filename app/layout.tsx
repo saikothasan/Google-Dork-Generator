@@ -4,7 +4,11 @@ import type { Metadata } from "next"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { ThemeProvider } from "@/components/ThemeProvider"
-import { TelegramPrompt } from "@/components/TelegramPrompt"
+import dynamic from "next/dynamic"
+
+const TelegramPrompt = dynamic(() => import("@/components/TelegramPrompt").then((mod) => mod.TelegramPrompt), {
+  ssr: false,
+})
 
 const inter = Inter({ subsets: ["latin"] })
 
