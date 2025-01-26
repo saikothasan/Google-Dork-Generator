@@ -30,8 +30,8 @@ export default function GoogleDorkGenerator() {
   const [inText, setInText] = useState("")
   const [excludeWords, setExcludeWords] = useState("")
   const [dateRange, setDateRange] = useState("")
-  const [useCache, setUseCache] = useState(false)
-  const [useRelated, setUseRelated] = useState(false)
+  const [useCache, setUseCache] = useState<boolean>(false)
+  const [useRelated, setUseRelated] = useState<boolean>(false)
   const [generatedDork, setGeneratedDork] = useState("")
   const [savedDorks, setSavedDorks] = useState<Dork[]>([])
   const [bulkKeywords, setBulkKeywords] = useState("")
@@ -282,11 +282,19 @@ export default function GoogleDorkGenerator() {
                 </div>
                 <div className="flex flex-wrap gap-4">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="useCache" checked={useCache} onCheckedChange={setUseCache} />
+                    <Checkbox
+                      id="useCache"
+                      checked={useCache}
+                      onCheckedChange={(checked) => setUseCache(checked === true)}
+                    />
                     <Label htmlFor="useCache">Use cache:</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="useRelated" checked={useRelated} onCheckedChange={setUseRelated} />
+                    <Checkbox
+                      id="useRelated"
+                      checked={useRelated}
+                      onCheckedChange={(checked) => setUseRelated(checked === true)}
+                    />
                     <Label htmlFor="useRelated">Use related:</Label>
                   </div>
                 </div>
