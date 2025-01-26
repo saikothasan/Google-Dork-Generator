@@ -14,7 +14,7 @@ export function TelegramPrompt() {
         <Button
           variant="secondary"
           className="bg-white text-blue-500 hover:bg-blue-100"
-          onClick={() => window.open("https://t.me/googledorkgenerator", "_blank")}
+          onClick={() => window.open("https://t.me/drkingbd", "_blank")}
         >
           Join Now
         </Button>
