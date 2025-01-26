@@ -142,6 +142,10 @@ export function BulkGenerator() {
 
   const handleExport = () => {
     const filteredResults = getFilteredResults()
+    if (filteredResults.length === 0) {
+      toast.error("No dorks to export")
+      return
+    }
     const content = filteredResults.map((r) => r.dork).join("\n")
     const blob = new Blob([content], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
@@ -150,6 +154,7 @@ export function BulkGenerator() {
     a.download = "google_dorks.txt"
     a.click()
     URL.revokeObjectURL(url)
+    toast.success("Dorks exported successfully")
   }
 
   const getFilteredResults = useCallback(() => {
