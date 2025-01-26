@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css"
 import { Search, BookOpen, Info, Save, Copy, Download, Share, Upload, Zap } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { motion } from "framer-motion"
+import { BulkGenerator } from "@/components/BulkGenerator"
 
 interface Dork {
   id?: string
@@ -68,6 +69,21 @@ export default function GoogleDorkGenerator() {
   }
 
   const handleGenerateDork = () => {
+    if (
+      !keyword &&
+      !site &&
+      !fileType &&
+      !inUrl &&
+      !inTitle &&
+      !inText &&
+      !excludeWords &&
+      !dateRange &&
+      !useCache &&
+      !useRelated
+    ) {
+      toast.error("Please enter at least one search parameter")
+      return
+    }
     const dork = generateDork()
     setGeneratedDork(dork)
   }
@@ -92,6 +108,10 @@ export default function GoogleDorkGenerator() {
   }
 
   const saveDork = async () => {
+    if (!generatedDork) {
+      toast.error("Please generate a dork first")
+      return
+    }
     const name = prompt("Enter a name for this dork:")
     if (name) {
       const newDork: Dork = { name, dork: generatedDork }
@@ -147,20 +167,20 @@ export default function GoogleDorkGenerator() {
   }
 
   const shareDork = async () => {
-    if (generatedDork) {
-      const { data, error } = await supabase.from("shared_dorks").insert({ dork: generatedDork }).select()
-      if (error) {
-        console.error("Error sharing dork:", error)
-        toast.error("Failed to share dork")
-      } else if (data && data.length > 0) {
-        const shareUrl = `${window.location.origin}/shared/${data[0].id}`
-        copyToClipboard(shareUrl)
-        toast.success("Share URL copied to clipboard!")
-      } else {
-        toast.error("Failed to generate share URL")
-      }
+    if (!generatedDork) {
+      toast.error("Please generate a dork first")
+      return
+    }
+    const { data, error } = await supabase.from("shared_dorks").insert({ dork: generatedDork }).select()
+    if (error) {
+      console.error("Error sharing dork:", error)
+      toast.error("Failed to share dork")
+    } else if (data && data.length > 0) {
+      const shareUrl = `${window.location.origin}/shared/${data[0].id}`
+      copyToClipboard(shareUrl)
+      toast.success("Share URL copied to clipboard!")
     } else {
-      toast.error("No dork generated to share")
+      toast.error("Failed to generate share URL")
     }
   }
 
@@ -178,23 +198,23 @@ export default function GoogleDorkGenerator() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="generator" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
-                <TabsTrigger value="generator" className="flex items-center justify-center">
-                  <Search className="w-4 h-4 mr-2" />
-                  Generator
-                </TabsTrigger>
-                <TabsTrigger value="bulk" className="flex items-center justify-center">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Bulk Generate
-                </TabsTrigger>
-                <TabsTrigger value="saved" className="flex items-center justify-center">
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Saved Dorks
-                </TabsTrigger>
-                <TabsTrigger value="about" className="flex items-center justify-center">
-                  <Info className="w-4 h-4 mr-2" />
-                  About
-                </TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 mb-8 p-1 bg-muted rounded-lg">
+                {[
+                  { value: "generator", icon: Search, label: "Generator" },
+                  { value: "bulk", icon: Upload, label: "Bulk Generate" },
+                  { value: "saved", icon: BookOpen, label: "Saved Dorks" },
+                  { value: "about", icon: Info, label: "About" },
+                ].map(({ value, icon: Icon, label }) => (
+                  <TabsTrigger
+                    key={value}
+                    value={value}
+                    className="flex items-center justify-center py-2 px-3 text-sm font-medium transition-all duration-200 ease-in-out"
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    <span className="hidden md:inline">{label}</span>
+                    <span className="md:hidden">{label.split(" ")[0]}</span>
+                  </TabsTrigger>
+                ))}
               </TabsList>
               <TabsContent value="generator">
                 <form
@@ -213,6 +233,7 @@ export default function GoogleDorkGenerator() {
                         onChange={(e) => setKeyword(e.target.value)}
                         placeholder="Enter main search term"
                         className="mt-1"
+                        aria-label="Main keyword"
                       />
                     </div>
                     <div>
@@ -223,6 +244,7 @@ export default function GoogleDorkGenerator() {
                         onChange={(e) => setSite(e.target.value)}
                         placeholder="e.g., example.com"
                         className="mt-1"
+                        aria-label="Site"
                       />
                     </div>
                     <div>
@@ -233,6 +255,7 @@ export default function GoogleDorkGenerator() {
                         onChange={(e) => setFileType(e.target.value)}
                         placeholder="e.g., pdf, doc, xls"
                         className="mt-1"
+                        aria-label="File type"
                       />
                     </div>
                     <div>
@@ -243,6 +266,7 @@ export default function GoogleDorkGenerator() {
                         onChange={(e) => setInUrl(e.target.value)}
                         placeholder="Text in the URL"
                         className="mt-1"
+                        aria-label="Text in URL"
                       />
                     </div>
                     <div>
@@ -253,6 +277,7 @@ export default function GoogleDorkGenerator() {
                         onChange={(e) => setInTitle(e.target.value)}
                         placeholder="Text in the page title"
                         className="mt-1"
+                        aria-label="Text in title"
                       />
                     </div>
                     <div>
@@ -263,6 +288,7 @@ export default function GoogleDorkGenerator() {
                         onChange={(e) => setInText(e.target.value)}
                         placeholder="Text in the page content"
                         className="mt-1"
+                        aria-label="Text in content"
                       />
                     </div>
                     <div>
@@ -273,6 +299,7 @@ export default function GoogleDorkGenerator() {
                         onChange={(e) => setExcludeWords(e.target.value)}
                         placeholder="Words to exclude (space-separated)"
                         className="mt-1"
+                        aria-label="Words to exclude"
                       />
                     </div>
                     <div>
@@ -283,6 +310,7 @@ export default function GoogleDorkGenerator() {
                         onChange={(e) => setDateRange(e.target.value)}
                         placeholder="e.g., 2457777-2457777"
                         className="mt-1"
+                        aria-label="Date range"
                       />
                     </div>
                   </div>
@@ -343,47 +371,7 @@ export default function GoogleDorkGenerator() {
                 )}
               </TabsContent>
               <TabsContent value="bulk">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="bulkKeywords">Bulk Keywords (one per line)</Label>
-                    <Textarea
-                      id="bulkKeywords"
-                      value={bulkKeywords}
-                      onChange={(e) => setBulkKeywords(e.target.value)}
-                      placeholder="Enter keywords, one per line"
-                      rows={5}
-                      className="mt-1"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleBulkGenerate}
-                    className="w-full bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white"
-                  >
-                    <Zap className="w-4 h-4 mr-2" />
-                    Generate Bulk Dorks
-                  </Button>
-                  {bulkDorks.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                      className="mt-4"
-                    >
-                      <Label htmlFor="bulkResults">Generated Bulk Dorks</Label>
-                      <Textarea id="bulkResults" value={bulkDorks.join("\n")} readOnly rows={10} className="mt-2" />
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <Button onClick={() => copyToClipboard(bulkDorks.join("\n"))} className="flex items-center">
-                          <Copy className="w-4 h-4 mr-2" />
-                          Copy All
-                        </Button>
-                        <Button onClick={handleSaveBulkToFile} className="flex items-center">
-                          <Download className="w-4 h-4 mr-2" />
-                          Save to File
-                        </Button>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
+                <BulkGenerator />
               </TabsContent>
               <TabsContent value="saved">
                 <div className="space-y-4">
